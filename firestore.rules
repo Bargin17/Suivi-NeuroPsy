@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: entries
+    // Fields:
+    //   - uid: string (required) - owner ID
+    //   - date: string (required) - ISO date string
+    //   - situation: string (required) - max 1000 chars
+    //   - functions: string (optional) - max 500 chars
+    //   - reaction: string (optional) - max 1000 chars
+    //   - consequence: string (optional) - max 1000 chars
+    //   - emotion: int (required) - 0 to 10
+    //   - createdAt: string (required) - ISO date string
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEntry(data) {
+      return data.keys().hasAll(['uid', 'date', 'situation', 'emotion', 'createdAt']) &&
+             data.uid is string &&
+             data.date is string &&
+             data.situation is string && data.situation.size() <= 2000 &&
+             data.emotion is int && data.emotion >= 0 && data.emotion <= 10 &&
+             data.createdAt is string;
+    }
+
+    match /entries/{entryId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                      request.resource.data.uid == request.auth.uid &&
+                      isValidEntry(request.resource.data);
+      allow update: if isAuthenticated() && 
+                      resource.data.uid == request.auth.uid &&
+                      request.resource.data.uid == request.auth.uid &&
+                      isValidEntry(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+  }
+}

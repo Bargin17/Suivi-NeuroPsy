@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "NeuroEntry": {
+      "title": "Neuropsychological Entry",
+      "description": "A single entry tracking a neuropsychological situation.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The user ID of the owner."
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time of the situation."
+        },
+        "situation": {
+          "type": "string",
+          "description": "Brief description of the situation."
+        },
+        "functions": {
+          "type": "string",
+          "description": "The neuropsychological functions involved."
+        },
+        "reaction": {
+          "type": "string",
+          "description": "Reaction or behavior observed."
+        },
+        "consequence": {
+          "type": "string",
+          "description": "Concrete consequence of the situation."
+        },
+        "emotion": {
+          "type": "integer",
+          "description": "Emotion intensity from 0 to 10."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the entry was created."
+        }
+      },
+      "required": ["uid", "date", "situation", "emotion", "createdAt"]
+    }
+  },
+  "firestore": {
+    "entries": {
+      "schema": "NeuroEntry",
+      "description": "Collection of neuropsychological tracking entries."
+    }
+  }
+}
