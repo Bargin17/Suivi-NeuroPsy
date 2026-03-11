@@ -62,6 +62,15 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const EXECUTIVE_FUNCTIONS = [
+  'Inhibition',
+  'Mémoire de travail',
+  'Flexibilité',
+  'Planification/Organisation',
+  'Démarrage',
+  'Gestion de la charge mentale'
+];
+
 // Error handling types
 enum OperationType {
   CREATE = 'create',
@@ -219,6 +228,18 @@ export default function App() {
     } catch (err) {
       handleFirestoreError(err, editingId ? OperationType.UPDATE : OperationType.CREATE, path);
     }
+  };
+
+  const toggleFunction = (func: string) => {
+    const currentFunctions = formData.functions ? formData.functions.split(', ').map(f => f.trim()).filter(Boolean) : [];
+    const index = currentFunctions.indexOf(func);
+    let newFunctions;
+    if (index > -1) {
+      newFunctions = currentFunctions.filter(f => f !== func);
+    } else {
+      newFunctions = [...currentFunctions, func];
+    }
+    setFormData({ ...formData, functions: newFunctions.join(', ') });
   };
 
   const handleEdit = (entry: NeuroEntry) => {
@@ -497,14 +518,34 @@ export default function App() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <label className="text-xs uppercase tracking-wider font-semibold text-[#5A5A40]">Fonction(s) impliquée(s)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {EXECUTIVE_FUNCTIONS.map(func => {
+                      const isActive = formData.functions.split(', ').map(f => f.trim()).includes(func);
+                      return (
+                        <button
+                          key={func}
+                          type="button"
+                          onClick={() => toggleFunction(func)}
+                          className={cn(
+                            "px-4 py-2 rounded-full text-sm transition-all border",
+                            isActive 
+                              ? "bg-[#5A5A40] text-white border-[#5A5A40] shadow-md" 
+                              : "bg-[#F5F2ED] text-[#5A5A40] border-transparent hover:border-[#5A5A40]/30"
+                          )}
+                        >
+                          {func}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <input
                     type="text"
                     value={formData.functions}
                     onChange={e => setFormData({...formData, functions: e.target.value})}
-                    placeholder="Mémoire, attention, planification..."
-                    className="w-full bg-[#F5F2ED] border-none rounded-2xl p-4 focus:ring-2 focus:ring-[#5A5A40] transition-all"
+                    placeholder="Autres fonctions (séparées par des virgules)..."
+                    className="w-full bg-[#F5F2ED] border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[#5A5A40] transition-all"
                   />
                 </div>
 
